@@ -8,7 +8,7 @@
       "schematics": {},
       "root": "",
       "sourceRoot": "src",
-      "prefix": "app",
+      "prefix": "msh",
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:application",
@@ -88,6 +88,39 @@
               "src/styles.css"
             ],
             "scripts": []
+          }
+        }
+      }
+    },
+    "i18n-pro-angular": {
+      "projectType": "library",
+      "root": "projects/i18n-pro-angular",
+      "sourceRoot": "projects/i18n-pro-angular/src",
+      "prefix": "msh",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "options": {
+            "project": "projects/i18n-pro-angular/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/i18n-pro-angular/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/i18n-pro-angular/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "tsConfig": "projects/i18n-pro-angular/tsconfig.spec.json",
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ]
           }
         }
       }
