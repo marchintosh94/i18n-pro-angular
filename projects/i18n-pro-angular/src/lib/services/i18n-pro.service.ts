@@ -8,7 +8,7 @@ import {
   tap,
 } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
-import { checkMessageObjectFormat, getDynamicDataFromArgs, getPluralFromArgs } from '../utils/utils';
+import { checkMessageObjectFormat, combineTranslationTransformations, getDynamicDataFromArgs, getPluralFromArgs, getTranslationFromDictionary, getTranslationPlural, getTranslationWithDynamicData } from '../utils/utils';
 
 @Injectable({
   providedIn: 'root',
@@ -93,26 +93,17 @@ export class I18nProService {
     const locale = this.locale$.value || this._defaultLocale;
     const translationKey =
       this._messages[locale] &&
-      this._messages[locale][value.toLocaleLowerCase()]
-        ? value.toLocaleLowerCase()
+      this._messages[locale][value]
+        ? value
         : undefined;
 
-    let translation = translationKey
-      ? `${this._messages[locale][translationKey]}`
-      : value;
+    const translation = combineTranslationTransformations(value)(
+      getTranslationFromDictionary(this._messages, translationKey, locale),
+      getTranslationPlural(translationKey, plural, value),
+      getTranslationWithDynamicData(dynamicData),
+      (translation) => translation.trim()
+    );
 
-    if (translationKey && plural) {
-      translation = translation.split('|')[plural - 1] || value;
-    }
-    if (dynamicData) {
-      for (const key in dynamicData) {
-        translation = translation.replace(
-          `{${key}}`,
-          dynamicData[key]? `${dynamicData[key]}` : key
-        );
-      }
-    }
-
-    return translation.trim();
+    return translation;
   }
 }

@@ -1,4 +1,13 @@
-import { DynamicData, I18Message, Plural } from '../types/18n.types';
+import {
+  DynamicData,
+  I18Message,
+  I18Messages,
+  Plural,
+} from '../types/18n.types';
+import {
+  CombineTranslationTransformations,
+  TranslationTransormationFunction,
+} from '../types/utils.types';
 
 export const getPluralFromArgs = (args: any[]): Plural => {
   return typeof args[0] === 'number' && args[0] > 0 && args[0] < 4
@@ -36,3 +45,39 @@ export const checkMessageObjectFormat = (message: I18Message): string => {
   }
   return '';
 };
+
+export const combineTranslationTransformations = (defaultValue: string): CombineTranslationTransformations =>
+  (...functions: TranslationTransormationFunction[]) =>
+    functions.reduce(
+      (accumulator, currentCallback) => currentCallback(accumulator),
+      defaultValue
+    );
+
+export const getTranslationFromDictionary =
+  (messages: I18Messages, translationKey: string | undefined, locale: string) =>
+  (value: string) =>
+    translationKey ? `${messages[locale][translationKey]}` : value;
+
+export const getTranslationPlural =
+  (translationKey: string | undefined, plural: Plural, defaultValue: string) =>
+  (translation: string) => {
+    if (!translationKey || !plural) {
+      return translation;
+    }
+    return translation.split('|')[plural - 1] || defaultValue;
+  };
+
+export const getTranslationWithDynamicData =
+  (dynamicData: DynamicData | undefined) => (translation: string) => {
+    if (!dynamicData) {
+      return translation;
+    }
+    return Object.entries(dynamicData).reduce(
+      (accumulator, [key]) =>
+        accumulator.replace(
+          `{${key}}`,
+          dynamicData[key] ? `${dynamicData[key]}` : key
+        ),
+      translation
+    );
+  };
