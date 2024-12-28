@@ -81,3 +81,18 @@ export const getTranslationWithDynamicData =
       translation
     );
   };
+
+export const tryParseDictionary = (
+  data: string | LocalizedDictionary
+): LocalizedDictionary => {
+  try {
+    const dictionary =
+      typeof data === 'string'
+        ? (JSON.parse(data) as LocalizedDictionary)
+        : data;
+    return dictionary;
+  } catch (err) {
+    console.error('Error parsing dictionary', err);
+    return {};
+  }
+};

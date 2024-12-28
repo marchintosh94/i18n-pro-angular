@@ -3,6 +3,7 @@ import {
   LocalizedDictionary,
   I18nDictionary,
   TranslationArguments,
+  ChangeLanguageOptions,
 } from '../types/18n.types';
 import { BehaviorSubject, catchError, Observable, Subscriber, tap } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
@@ -14,6 +15,7 @@ import {
   getTranslationFromDictionary,
   getTranslationPlural,
   getTranslationWithDynamicData,
+  tryParseDictionary,
 } from '../utils/utils';
 
 @Injectable({
@@ -67,7 +69,10 @@ export class I18nProService {
     );
   };
 
-  loadLocalizedDictionary = (locale: string, apiUrl: string): Observable<string> => {
+  loadLocalizedDictionary = (
+    locale: string,
+    apiUrl: string
+  ): Observable<string> => {
     return new Observable((subscriber) => {
       if (this.isLoadingLanguage$.value) {
         return subscriber.next(undefined);
@@ -93,6 +98,46 @@ export class I18nProService {
       });
     });
   };
+
+  setLocalizedDictionary(
+    locale: string,
+    localizedDictionary: string | LocalizedDictionary
+  ): Observable<string> {
+    return new Observable(subscriber => {
+      const _localizedDictionary = tryParseDictionary(localizedDictionary);
+      const error = checkDictionaryObjectFormat(_localizedDictionary);
+      if (error) {
+        return subscriber.error(new Error(error));
+      }
+      this._setLocalizedDictionary(locale, _localizedDictionary);
+      this._setLocale(locale);
+      this._subscriberSucceedActions(subscriber, locale);
+    });
+  }
+
+  changeLocale(locale: string, options?: ChangeLanguageOptions): void {
+    if (!locale){
+      return console.error('Locale is required');
+    }
+    if (this.locale$.value === locale) {
+      return;
+    }
+    if (this._storedLocales.includes(locale)) {
+      this._setLocale(locale);
+      return;
+    }
+    if (!options) {
+      return console.error('ChangeLanguageOptions are required cause the locale is not loaded');
+    }
+    if ('apiUrl' in options) {
+      this.loadLocalizedDictionary(locale, options.apiUrl).subscribe();
+      return;
+    }
+    if ('localizedDictionary' in options) {
+      this.setLocalizedDictionary(locale, options.localizedDictionary).subscribe();
+      return;
+    }
+  }
 
   t(value: string, ...args: TranslationArguments): string {
     const flatArgs = args.flat();
