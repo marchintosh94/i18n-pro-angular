@@ -1,7 +1,7 @@
 import {
   DynamicData,
-  I18Message,
-  I18Messages,
+  LocalizedDictionary,
+  I18nDictionary,
   Plural,
 } from '../types/18n.types';
 import {
@@ -26,18 +26,18 @@ export const getDynamicDataFromArgs = (
 /**
  * This method checks the consistency of translation dictionary of selected locale
  * If it returns a NON empty string, it means that there is an error
- * @param {I18Message} message
+ * @param {LocalizedDictionary} localizedDictionary
  * @returns {string} error message
  */
-export const checkMessageObjectFormat = (message: I18Message): string => {
-  const messageKeys = Object.keys(message);
-  if (messageKeys.length === 0) {
+export const checkDictionaryObjectFormat = (localizedDictionary: LocalizedDictionary): string => {
+  const dictionaryKeys = Object.keys(localizedDictionary);
+  if (dictionaryKeys.length === 0) {
     return 'No keys found. Please check the JSON and return at least 1 translation';
   }
 
   if (
-    Array.isArray(message) ||
-    Object.entries(message).find(
+    Array.isArray(localizedDictionary) ||
+    Object.entries(localizedDictionary).find(
       ([_, val]) => typeof val !== 'string' && typeof val !== 'number'
     )
   ) {
@@ -54,9 +54,9 @@ export const combineTranslationTransformations = (defaultValue: string): Combine
     );
 
 export const getTranslationFromDictionary =
-  (messages: I18Messages, translationKey: string | undefined, locale: string) =>
+  (dictionary: I18nDictionary, translationKey: string | undefined, locale: string) =>
   (value: string) =>
-    translationKey ? `${messages[locale][translationKey]}` : value;
+    translationKey ? `${dictionary[locale][translationKey]}` : value;
 
 export const getTranslationPlural =
   (translationKey: string | undefined, plural: Plural, defaultValue: string) =>

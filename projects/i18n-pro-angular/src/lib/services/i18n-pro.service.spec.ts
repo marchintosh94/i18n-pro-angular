@@ -4,7 +4,7 @@ import {
   provideHttpClientTesting,
 } from '@angular/common/http/testing';
 import { I18nProService } from './i18n-pro.service';
-import { I18Message } from '../types/18n.types';
+import { LocalizedDictionary } from '../types/18n.types';
 import { provideHttpClient } from '@angular/common/http';
 
 describe('I18nProService', () => {
@@ -37,30 +37,32 @@ describe('I18nProService', () => {
     service['_setLocale'](locale);
   });
 
-  describe('loadLocaleMessages', () => {
-    it('should load locale messages from API', () => {
+  describe('loadLocalizedDictionary', () => {
+    it('should load locale dictionary from API', () => {
       const locale = 'en';
       const apiUrl = 'http://example.com';
-      const mockMessages: I18Message = { hello: 'Hello' };
+      const mockLocalDictionary: LocalizedDictionary = { hello: 'Hello' };
 
-      service.loadLocaleMessages(locale, apiUrl).subscribe((loadedLocale) => {
+      service.loadLocalizedDictionary(locale, apiUrl).subscribe((loadedLocale) => {
         expect(loadedLocale).toBe(locale);
         expect(service['locale$'].value).toBe(locale);
         expect(service['isLoadingLanguage$'].value).toBe(false);
-        expect(service['_messages']).toEqual({ [locale]: mockMessages });
+        expect(service['_dictionary']).toEqual({
+          [locale]: mockLocalDictionary,
+        });
       });
 
       const req = httpMock.expectOne(`${apiUrl}`);
       expect(req.request.method).toBe('GET');
-      req.flush(mockMessages);
+      req.flush(mockLocalDictionary);
     });
 
     it('should throw an error if the response is not a valid translation dictionary', () => {
       const locale = 'en';
       const apiUrl = 'http://example.com/error';
-      const mockMessages: I18Message = [{ hello: 'Hello' }] as any;
+      const mockLocalDictionary: LocalizedDictionary = [{ hello: 'Hello' }] as any;
 
-      service.loadLocaleMessages(locale, apiUrl).subscribe({
+      service.loadLocalizedDictionary(locale, apiUrl).subscribe({
         error: (error) => {
           expect(error).toEqual(
             new Error(
@@ -73,14 +75,14 @@ describe('I18nProService', () => {
 
       const req = httpMock.expectOne(`${apiUrl}`);
       expect(req.request.method).toBe('GET');
-      req.flush(mockMessages);
+      req.flush(mockLocalDictionary);
     });
 
     it('should throw an error if HTTP request fails', () => {
       const locale = 'en';
       const apiUrl = 'http://example.com/error';
 
-      service.loadLocaleMessages(locale, apiUrl).subscribe({
+      service.loadLocalizedDictionary(locale, apiUrl).subscribe({
         error: (error) => {
           console.log('ERROR', error);
           expect(error).toBeTruthy();
@@ -93,24 +95,24 @@ describe('I18nProService', () => {
       req.flush('Failed', { status: 500, statusText: 'Internal server error' });
     });
 
-    it('should not load locale messages if is already loading', () => {
+    it('should not load locale dictionary if is already loading', () => {
       const locale = 'en';
       const apiUrl = 'http://example.com';
       service['isLoadingLanguage$'].next(true);
 
-      service.loadLocaleMessages(locale, apiUrl).subscribe((loadedLocale) => {
+      service.loadLocalizedDictionary(locale, apiUrl).subscribe((loadedLocale) => {
         expect(loadedLocale).toBeUndefined();
       });
 
       httpMock.expectNone(`${apiUrl}`);
     });
 
-    it('should not load locale messages if are already loaded', () => {
+    it('should not load locale dictionary if are already loaded', () => {
       const locale = 'en';
       const apiUrl = 'http://example.com';
       service['_storedLocales'] = [locale];
 
-      service.loadLocaleMessages(locale, apiUrl).subscribe((loadedLocale) => {
+      service.loadLocalizedDictionary(locale, apiUrl).subscribe((loadedLocale) => {
         expect(loadedLocale).toBe(locale);
       });
 
@@ -122,7 +124,7 @@ describe('I18nProService', () => {
       const apiUrl = 'http://example.com';
       service.locale$.next(locale);
 
-      service.loadLocaleMessages(locale, apiUrl).subscribe((loadedLocale) => {
+      service.loadLocalizedDictionary(locale, apiUrl).subscribe((loadedLocale) => {
         expect(loadedLocale).toBe(locale);
       });
 
@@ -133,9 +135,9 @@ describe('I18nProService', () => {
   describe('t function', () => {
     it('should translate a message', () => {
       const locale = 'en';
-      const messages: I18Message = { hello: 'Hello' };
+      const localizedDictionary: LocalizedDictionary = { hello: 'Hello' };
       service['locale$'].next(locale);
-      service['_messages'] = { [locale]: messages };
+      service['_dictionary'] = { [locale]: localizedDictionary };
 
       const translation = service.t('hello');
       expect(translation).toBe('Hello');
@@ -143,9 +145,9 @@ describe('I18nProService', () => {
 
     it('should handle pluralization', () => {
       const locale = 'en';
-      const messages: I18Message = { item: 'One item|{count} items' };
+      const localizedDictionary: LocalizedDictionary = { item: 'One item|{count} items' };
       service['locale$'].next(locale);
-      service['_messages'] = { [locale]: messages };
+      service['_dictionary'] = { [locale]: localizedDictionary };
 
       const translation = service.t('item', 2, { count: 2 });
       expect(translation).toBe('2 items');
@@ -153,9 +155,11 @@ describe('I18nProService', () => {
 
     it('should handle dynamic data', () => {
       const locale = 'en';
-      const messages: I18Message = { greeting: 'Hello, {name}!' };
+      const localizedDictionary: LocalizedDictionary = {
+        greeting: 'Hello, {name}!',
+      };
       service['locale$'].next(locale);
-      service['_messages'] = { [locale]: messages };
+      service['_dictionary'] = { [locale]: localizedDictionary };
 
       const translation = service.t('greeting', { name: 'John' });
       expect(translation).toBe('Hello, John!');
@@ -164,7 +168,7 @@ describe('I18nProService', () => {
     it('should return the key if the translation is not found', () => {
       const locale = 'en';
       service['locale$'].next(locale);
-      service['_messages'] = { [locale]: {} };
+      service['_dictionary'] = { [locale]: {} };
 
       const translation = service.t('not-found');
       expect(translation).toBe('not-found');
@@ -172,10 +176,10 @@ describe('I18nProService', () => {
 
     it('should use the default locale if the current locale is not set', () => {
       const locale = 'en';
-      const messages: I18Message = { hello: 'Hello' };
+      const localizedDictionary: LocalizedDictionary = { hello: 'Hello' };
       service.locale$.next('');
       service['_defaultLocale'] = locale;
-      service['_messages'] = { [locale]: messages };
+      service['_dictionary'] = { [locale]: localizedDictionary };
 
       const translation = service.t('hello');
       expect(translation).toBe('Hello');
@@ -183,9 +187,11 @@ describe('I18nProService', () => {
 
     it('should return the value if the plural argoument is not found', () => {
       const locale = 'en';
-      const messages: I18Message = { item: 'One item|{count} items' };
+      const localizedDictionary: LocalizedDictionary = {
+        item: 'One item|{count} items',
+      };
       service['locale$'].next(locale);
-      service['_messages'] = { [locale]: messages };
+      service['_dictionary'] = { [locale]: localizedDictionary };
 
       const translation = service.t('item', 3);
       expect(translation).toBe('item');
@@ -193,9 +199,11 @@ describe('I18nProService', () => {
 
     it('should replace the dynamic data with the key of the object if no related value is found', () => {
       const locale = 'en';
-      const messages: I18Message = { greeting: 'Hello, {name}!' };
+      const localizedDictionary: LocalizedDictionary = {
+        greeting: 'Hello, {name}!',
+      };
       service['locale$'].next(locale);
-      service['_messages'] = { [locale]: messages };
+      service['_dictionary'] = { [locale]: localizedDictionary };
 
       const translation = service.t('greeting', { name: '' });
       expect(translation).toBe('Hello, name!');

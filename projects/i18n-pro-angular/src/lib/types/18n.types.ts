@@ -1,8 +1,8 @@
-export interface I18Message {
+export interface LocalizedDictionary {
   [key: string]: string;
 }
-export interface I18Messages {
-  [key: string]: I18Message;
+export interface I18nDictionary {
+  [key: string]: LocalizedDictionary;
 }
 export interface DynamicData {
   [key: string]: string | number;

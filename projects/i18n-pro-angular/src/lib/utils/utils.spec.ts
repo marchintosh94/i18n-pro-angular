@@ -1,5 +1,5 @@
-import { getPluralFromArgs, getDynamicDataFromArgs, checkMessageObjectFormat } from './utils';
-import { I18Message } from '../types/18n.types';
+import { getPluralFromArgs, getDynamicDataFromArgs, checkDictionaryObjectFormat } from './utils';
+import { LocalizedDictionary } from '../types/18n.types';
 
 describe('Utils', () => {
   describe('getPluralFromArgs', () => {
@@ -32,25 +32,33 @@ describe('Utils', () => {
     });
   });
 
-  describe('checkMessageObjectFormat', () => {
-    it('should return an error message if the message object has no keys', () => {
-      const message: I18Message = {};
-      expect(checkMessageObjectFormat(message)).toBe('No keys found. Please check the JSON and return at least 1 translation');
+  describe('checkDictionaryObjectFormat', () => {
+    it('should return an error message if the localizedDictionary object has no keys', () => {
+      const localizedDictionary: LocalizedDictionary = {};
+      expect(checkDictionaryObjectFormat(localizedDictionary)).toBe(
+        'No keys found. Please check the JSON and return at least 1 translation'
+      );
     });
 
-    it('should return an error message if the message object is an array', () => {
-      const message: I18Message = [{key: 'value'}] as any;
-      expect(checkMessageObjectFormat(message)).toBe('Invalid format for dictionary. It must be like a Record<string, string>');
+    it('should return an error message if the localizedDictionary object is an array', () => {
+      const localizedDictionary: LocalizedDictionary = [
+        { key: 'value' },
+      ] as any;
+      expect(checkDictionaryObjectFormat(localizedDictionary)).toBe(
+        'Invalid format for dictionary. It must be like a Record<string, string>'
+      );
     });
 
-    it('should return an error message if the message object contains non-string or non-number values', () => {
-      const message: I18Message = { key: {} as any };
-      expect(checkMessageObjectFormat(message)).toBe('Invalid format for dictionary. It must be like a Record<string, string>');
+    it('should return an error message if the localizedDictionary object contains non-string or non-number values', () => {
+      const localizedDictionary: LocalizedDictionary = { key: {} as any };
+      expect(checkDictionaryObjectFormat(localizedDictionary)).toBe(
+        'Invalid format for dictionary. It must be like a Record<string, string>'
+      );
     });
 
-    it('should return an empty string if the message object is valid', () => {
-      const message: I18Message = { key: 'value' };
-      expect(checkMessageObjectFormat(message)).toBe('');
+    it('should return an empty string if the localizedDictionary object is valid', () => {
+      const localizedDictionary: LocalizedDictionary = { key: 'value' };
+      expect(checkDictionaryObjectFormat(localizedDictionary)).toBe('');
     });
   });
 });

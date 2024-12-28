@@ -1,20 +1,26 @@
 import { inject, Injectable } from '@angular/core';
-import { I18Message, I18Messages, TranslationArguments } from '../types/18n.types';
 import {
-  BehaviorSubject,
-  catchError,
-  Observable,
-  Subscriber,
-  tap,
-} from 'rxjs';
+  LocalizedDictionary,
+  I18nDictionary,
+  TranslationArguments,
+} from '../types/18n.types';
+import { BehaviorSubject, catchError, Observable, Subscriber, tap } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
-import { checkMessageObjectFormat, combineTranslationTransformations, getDynamicDataFromArgs, getPluralFromArgs, getTranslationFromDictionary, getTranslationPlural, getTranslationWithDynamicData } from '../utils/utils';
+import {
+  checkDictionaryObjectFormat,
+  combineTranslationTransformations,
+  getDynamicDataFromArgs,
+  getPluralFromArgs,
+  getTranslationFromDictionary,
+  getTranslationPlural,
+  getTranslationWithDynamicData,
+} from '../utils/utils';
 
 @Injectable({
   providedIn: 'root',
 })
 export class I18nProService {
-  private _messages: I18Messages = {};
+  private _dictionary: I18nDictionary = {};
   private _defaultLocale = '';
   private _storedLocales: string[] = [];
   private http: HttpClient = inject(HttpClient);
@@ -26,9 +32,12 @@ export class I18nProService {
     this.locale$.next(locale);
   };
 
-  private _setLocaleMessages = (locale: string, messages: I18Message) => {
+  private _setLocalizedDictionary = (
+    locale: string,
+    dictionary: LocalizedDictionary
+  ) => {
     this._storedLocales = [...new Set([...this._storedLocales, locale])];
-    this._messages = { ...this._messages, [locale]: messages };
+    this._dictionary = { ...this._dictionary, [locale]: dictionary };
   };
 
   private _subscriberSucceedActions = (
@@ -39,17 +48,17 @@ export class I18nProService {
     subscriber.complete();
   };
 
-  private _getRemoteLocaleMessages = (
+  private _getRemoteLocalizedDictionary = (
     apiUrl: string
-  ): Observable<I18Message> => {
+  ): Observable<LocalizedDictionary> => {
     this.isLoadingLanguage$.next(true);
-    return this.http.get<I18Message>(`${apiUrl}`).pipe(
+    return this.http.get<LocalizedDictionary>(`${apiUrl}`).pipe(
       tap((response) => {
-        const error = checkMessageObjectFormat(response);
+        const error = checkDictionaryObjectFormat(response);
         if (error) {
           throw new Error(error);
         }
-        this.isLoadingLanguage$.next(false)
+        this.isLoadingLanguage$.next(false);
       }),
       catchError((error) => {
         this.isLoadingLanguage$.next(false);
@@ -58,7 +67,7 @@ export class I18nProService {
     );
   };
 
-  loadLocaleMessages = (locale: string, apiUrl: string): Observable<string> => {
+  loadLocalizedDictionary = (locale: string, apiUrl: string): Observable<string> => {
     return new Observable((subscriber) => {
       if (this.isLoadingLanguage$.value) {
         return subscriber.next(undefined);
@@ -72,15 +81,15 @@ export class I18nProService {
         this._subscriberSucceedActions(subscriber, locale);
         return;
       }
-      this._getRemoteLocaleMessages(`${apiUrl}`).subscribe({
+      this._getRemoteLocalizedDictionary(`${apiUrl}`).subscribe({
         next: (response) => {
-          this._setLocaleMessages(locale, response);
+          this._setLocalizedDictionary(locale, response);
           this._setLocale(locale);
           this._subscriberSucceedActions(subscriber, locale);
         },
         error: (err) => {
           subscriber.error(err);
-        }
+        },
       });
     });
   };
@@ -92,13 +101,12 @@ export class I18nProService {
 
     const locale = this.locale$.value || this._defaultLocale;
     const translationKey =
-      this._messages[locale] &&
-      this._messages[locale][value]
+      this._dictionary[locale] && this._dictionary[locale][value]
         ? value
         : undefined;
 
     const translation = combineTranslationTransformations(value)(
-      getTranslationFromDictionary(this._messages, translationKey, locale),
+      getTranslationFromDictionary(this._dictionary, translationKey, locale),
       getTranslationPlural(translationKey, plural, value),
       getTranslationWithDynamicData(dynamicData),
       (translation) => translation.trim()
