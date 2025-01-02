@@ -77,7 +77,7 @@
               "zone.js",
               "zone.js/testing"
             ],
-            "tsConfig": "tsconfig.spec.json",
+            "tsConfig": "projects/i18n-pro-angular/tsconfig.spec.json",
             "assets": [
               {
                 "glob": "**/*",

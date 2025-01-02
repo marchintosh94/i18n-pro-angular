@@ -6,7 +6,12 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "lib:test": "ng test i18n-pro-angular --no-watch --code-coverage",
+    "lib:test:ci": "ng test i18n-pro-angular --no-watch --no-progress --browsers=ChromeHeadless",
+    "lib:build": "ng build i18n-pro-angular",
+    "lib:publish": "npm run build && npm publish dist/i18n-pro-angular",
+    "prepare": "husky"
   },
   "private": true,
   "dependencies": {
@@ -27,6 +32,7 @@
     "@angular/cli": "^19.0.5",
     "@angular/compiler-cli": "^19.0.0",
     "@types/jasmine": "~5.1.0",
+    "husky": "^9.1.7",
     "jasmine-core": "~5.4.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",
