@@ -7,7 +7,24 @@ export const routes: Routes = [
     component: HomeComponent
   },
   {
-    path: 'basic',
-    loadComponent: () => import('./features/basic/basic.component').then((m) => m.BasicComponent),
+    path: 'example',
+    children: [
+      {
+        path: 'basic',
+        loadComponent: () => import('./features/basic/basic.component').then(m => m.BasicComponent),
+      },
+      {
+        path: 'directive',
+        loadComponent: () => import('./features/basic/basic.component').then(m => m.BasicComponent),
+      },
+      {
+        path: 'pipe',
+        loadComponent: () => import('./features/basic/basic.component').then(m => m.BasicComponent),
+      },
+    ]
+  },
+  {
+    path: 'docs',
+    loadComponent: () => import('./features/docs/docs.component').then(m => m.DocsComponent)
   }
 ];

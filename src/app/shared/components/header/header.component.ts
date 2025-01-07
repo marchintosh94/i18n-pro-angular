@@ -1,10 +1,12 @@
 import { Component, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { LogoComponent } from '../logo/logo.component';
+import { link } from 'fs';
+import { MainMenuComponent } from "../../menu/main-menu/main-menu.component";
 
 @Component({
   selector: 'msh-header',
-  imports: [RouterLink, RouterLinkActive, LogoComponent],
+  imports: [RouterLink, RouterLinkActive, LogoComponent, MainMenuComponent],
   template: `
     <header class="absolute inset-x-0 top-0 z-50">
       <nav
@@ -41,17 +43,31 @@ import { LogoComponent } from '../logo/logo.component';
             </svg>
           </button>
         </div>
-        <div class="hidden lg:flex lg:gap-x-12">
-          @for (route of routes; track route.link) {
-          <a
-            routerLinkActive="active"
-            [routerLink]="route.link"
-            class="text-sm/6 font-semibold "
-            >{{ route.label }}</a
-          >
-          }
+        <div class="hidden lg:flex lg:gap-x-12 lg:items-center">
+          <msh-main-menu></msh-main-menu>
         </div>
-        <div class="hidden lg:flex lg:flex-1 lg:justify-end"></div>
+        <div class="hidden lg:flex lg:flex-1 lg:justify-end">
+          <button
+            (click)="toggleExampleRoutes()"
+            [class]="exampleRoutesOpen() ? 'pr-3 border-r-[1px] mr-6' : ''"
+            class="text-md/6 font-semibold"
+          >
+            Examples @if(!exampleRoutesOpen()){&rarr;}
+          </button>
+          <div
+            [class]="exampleRoutesOpen() ? 'lg:w-52' : 'w-0'"
+            class="lg:flex lg:gap-x-8 def-transition overflow-hidden"
+          >
+            @for (route of exampleRoutes; track route.link) {
+            <a
+              routerLinkActive="active"
+              [routerLink]="route.link"
+              class="text-sm/6 font-semibold"
+              >{{ route.label }}</a
+            >
+            }
+          </div>
+        </div>
       </nav>
 
       @if(mobileMenuOpen()){
@@ -90,8 +106,26 @@ import { LogoComponent } from '../logo/logo.component';
           </div>
           <div class="mt-6 flow-root">
             <div class="-my-6 divide-y divide-gray-500/25">
-              <div class="space-y-2 py-6">
-                @for (route of routes; track route.link) {
+              <div class="space-y-2 pb-6 pt-4">
+                <span
+                  class="text-gray-400 text-sm
+                "
+                  >Main</span
+                >
+                <a
+                  routerLink="/docs"
+                  routerLinkActive="active"
+                  class="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold  hover:bg-gray-800"
+                  >Docs</a
+                >
+              </div>
+              <div class="space-y-2 pb-6 pt-2">
+                <span
+                  class="text-gray-400 text-sm
+                "
+                  >Examples</span
+                >
+                @for (route of exampleRoutes; track route.link) {
                 <a
                   [routerLink]="route.link"
                   routerLinkActive="active"
@@ -99,6 +133,20 @@ import { LogoComponent } from '../logo/logo.component';
                   >{{ route.label }}</a
                 >
                 }
+              </div>
+              <div class="space-x-6 py-6 flex items-center">
+                <a
+                  target="_blank"
+                  href="https://github.com/marchintosh94/i18n-pro-angular"
+                  class="text-sm/6 font-semibold"
+                  ><img class="h-8 w-8" src="/GitHub.svg"
+                /></a>
+                <a
+                  target="_blank"
+                  href="https://www.npmjs.com/~marchintosh94"
+                  class="text-sm/6 font-semibold"
+                  ><img class="h-10 w-10" src="/npm.svg"
+                /></a>
               </div>
             </div>
           </div>
@@ -111,22 +159,41 @@ import { LogoComponent } from '../logo/logo.component';
 })
 export class HeaderComponent {
   mobileMenuOpen = signal(false);
-  routes = [
+  exampleRoutesOpen = signal(false);
+  exampleRoutes = [
     {
       label: 'Basic',
-      link: '/basic',
+      link: '/example/basic',
     },
     {
       label: 'Directive',
-      link: '/directive',
+      link: '/example/directive',
     },
     {
       label: 'Pipe',
-      link: '/pipe',
+      link: '/example/pipe',
+    },
+  ];
+  mainRoutes = [
+    {
+      label: 'Docs',
+      link: '/docs',
+    },
+    {
+      label: 'GitHub',
+      link: 'https://github.com/marchintosh94/i18n-pro-angular',
+    },
+    {
+      label: 'Npm',
+      link: 'https://github.com/marchintosh94/i18n-pro-angular',
     },
   ];
 
   toggleMenu() {
     this.mobileMenuOpen.update((value) => !value);
+  }
+
+  toggleExampleRoutes() {
+    this.exampleRoutesOpen.update((value) => !value);
   }
 }

@@ -10,6 +10,9 @@
   button {
     @apply transition-all duration-300 ease-in-out
   }
+  code {
+    @apply bg-clip-text text-transparent bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500
+  }
 }
 
 @layer utilities {
@@ -20,7 +23,7 @@
 
 @layer components {
   .bg-gradient-default-dark {
-    @apply bg-gradient-to-br from-indigo-950 via-purple-950 to-pink-950
+    @apply bg-gradient-to-br from-[#15123a] via-[#210b48] to-[#300552]
   }
   .bg-gradient-default-light {
     @apply bg-gradient-to-br from-indigo-700 via-purple-700 to-pink-700
@@ -28,5 +31,12 @@
   a.bg-gradient-default-light,
   button.bg-gradient-default-light {
     @apply hover:from-indigo-600 hover:via-purple-600 hover:to-pink-600
+  }
+
+  .title {
+    @apply text-4xl font-bold
+  }
+  .subtitle {
+    @apply text-base/7 font-semibold text-slate-400
   }
 }
