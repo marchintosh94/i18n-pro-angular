@@ -1,8 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { LogoComponent } from '../logo/logo.component';
-import { link } from 'fs';
-import { MainMenuComponent } from "../../menu/main-menu/main-menu.component";
+import { MainMenuComponent } from "../menu/main-menu/main-menu.component";
 
 @Component({
   selector: 'msh-header',
