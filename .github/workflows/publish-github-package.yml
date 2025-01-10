@@ -31,10 +31,7 @@ jobs:
     - name: Install dependencies
       run: npm ci
 
-    - name: Build
-      run: npm run build
-
-    - name: Publish
-      run: npm publish
+    - name: Build & Publish
+      run: npm run lib:publish
       env:
         NODE_AUTH_TOKEN: ${{secrets.PUBLISH_TOKEN}}
