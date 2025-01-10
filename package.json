@@ -10,7 +10,7 @@
     "lib:test": "ng test i18n-pro-angular --no-watch --code-coverage",
     "lib:test:ci": "ng test i18n-pro-angular --no-watch --no-progress --browsers=ChromeHeadless",
     "lib:build": "ng build i18n-pro-angular",
-    "lib:publish": "npm run build && npm publish dist/i18n-pro-angular",
+    "lib:publish": "ng build i18n-pro-angular && npm publish ./dist/i18n-pro-angular",
     "prepare": "husky"
   },
   "private": true,
