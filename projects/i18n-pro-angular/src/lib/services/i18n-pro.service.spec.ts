@@ -354,4 +354,53 @@ describe('I18nProService', () => {
       service.changeLocale(locale, { localizedDictionary });
     });
   });
+
+  describe('removeLocale', () => {
+    it('should remove an existing locale, but not the active', () => {
+      const enDictionary = { hello: 'Hello'};
+      const itDictionary = { hello: 'Ciao'};
+
+      service.locale$.subscribe((loadedLocale) => {
+        if (loadedLocale == 'en'){
+          service.removeLocale('it');
+          expect(service['_dictionary']).toEqual({'en': enDictionary});
+          expect(service['_dictionary']['it']).toBeUndefined();
+          expect(service['_storedLocales']).not.toContain('it');
+          expect(service.locale$.value).toBe('en');
+        }
+      });
+      service.changeLocale('it', { localizedDictionary: itDictionary });
+      service.changeLocale('en', { localizedDictionary: enDictionary });
+    });
+
+    it('should remove an existing and active locale', () => {
+      const enDictionary = { hello: 'Hello'};
+
+      service.locale$.subscribe((loadedLocale) => {
+        if (loadedLocale == 'en'){
+          service.removeLocale('en');
+          expect(service['_dictionary']).toEqual({});
+          expect(service['_dictionary']['en']).toBeUndefined();
+          expect(service['_storedLocales']).not.toContain('en');
+          expect(service.locale$.value).toBe('');
+        }
+      });
+      service.changeLocale('en', { localizedDictionary: enDictionary });
+    });
+
+    it('should do nothing if locale not exists', () => {
+      const enDictionary = { hello: 'Hello'};
+
+      service.locale$.subscribe((loadedLocale) => {
+        if (loadedLocale == 'en'){
+          service.removeLocale('it');
+          expect(service['_dictionary']).toEqual({ en: enDictionary });
+          expect(service['_dictionary']['it']).toBeUndefined();
+          expect(service['_storedLocales']).not.toContain('it');
+          expect(service.locale$.value).toBe('en');
+        }
+      });
+      service.changeLocale('en', { localizedDictionary: enDictionary });
+    });
+  });
 });

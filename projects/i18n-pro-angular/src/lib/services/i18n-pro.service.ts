@@ -139,6 +139,14 @@ export class I18nProService {
     }
   }
 
+  removeLocale(locale: string){
+    delete this._dictionary[locale]
+    this._storedLocales = this._storedLocales.filter(lang => locale !== lang)
+    if(this.locale$.value === locale){
+      this.locale$.next('')
+    }
+  }
+
   t(value: string, ...args: TranslationArguments): string {
     const flatArgs = args.flat();
     const plural = getPluralFromArgs(flatArgs);
